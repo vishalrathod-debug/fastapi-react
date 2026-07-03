@@ -1,0 +1,67 @@
+Jinja2 Template Syntax Cheat Sheet
+
+---
+
+# 1. Output Variables
+{{ variable_name }}
+{{ user.name }}
+{{ price | round(2) }}
+
+# 2. Statements / Logic
+{% if condition %} ... {% endif %}
+{% for item in items %} ... {% endfor %}
+{% set total = price * quantity %}
+
+# If Statements
+{% if age >= 18 %}
+  Adult
+{% elif age >= 13 %}
+  Teenager
+{% else %}
+  Child
+{% endif %}
+
+# For Loops
+{% for item in items %}
+  {{ loop.index }}: {{ item }}
+{% endfor %}
+
+# 3. Comments
+{# This is a comment #}
+
+# 4. Filters
+{{ name | upper }}
+{{ name | lower }}
+{{ items | length }}
+{{ nickname | default('Guest') }}
+
+# 5. Test Expressions
+{% if age is even %}Even{% endif %}
+{% if name is defined %}Name exists{% endif %}
+
+# 6. Template Inheritance
+<!-- base.html -->
+<html>
+<head><title>{% block title %}My Site{% endblock %}</title></head>
+<body>
+{% block content %}{% endblock %}
+</body>
+</html>
+
+<!-- child.html -->
+{% extends "base.html" %}
+{% block title %}Profile Page{% endblock %}
+{% block content %}<h1>Hello {{ name }}</h1>{% endblock %}
+
+# 7. Include Templates
+{% include 'navbar.html' %}
+
+# 8. Macros
+{% macro input(name, value='') %}<input type="text" name="{{ name }}" value="{{ value }}">{% endmacro %}
+{{ input('username') }}
+
+# 9. Notes
+- {{ }} for expressions
+- {% %} for logic
+- {# #} for comments
+- Always close loops and conditionals

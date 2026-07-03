@@ -1,0 +1,164 @@
+⭐ DAY 9 — SQLAlchemy ORM (Full Notes + Answers)
+🔵 1. What is ORM? (Answer)
+
+ORM stands for Object Relational Mapping.
+It is a technique that allows developers to interact with a database using Python objects instead of writing raw SQL queries.
+
+In simple words:
+You create Python classes → SQLAlchemy converts them into database tables.
+
+🔵 2. Why Use ORM? (Answer)
+
+It removes the need to write SQL queries manually.
+
+It prevents SQL injection attacks.
+
+It provides cleaner, readable, and organized code.
+
+It makes database operations faster to write and maintain.
+
+It allows you to work with databases in an object-oriented way.
+
+🔵 3. SQLAlchemy Setup (Answer)
+
+To use SQLAlchemy in Flask:
+
+from flask_sqlalchemy import SQLAlchemy
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data.db'
+db = SQLAlchemy(app)
+
+
+This creates the database file data.db.
+
+🔵 4. Creating a Model (Table) (Answer)
+
+A model is a Python class, and SQLAlchemy converts it into a table.
+
+Example model:
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    email = db.Column(db.String(100), unique=True)
+
+
+Here:
+
+User becomes a database table named user
+
+id, name, email become table columns
+
+🔵 5. Creating the Database Tables (Answer)
+with app.app_context():
+    db.create_all()
+
+🔵 6. Adding (Inserting) Data — CREATE (Answer)
+user = User(name="Vishal", email="vishal@example.com")
+db.session.add(user)
+db.session.commit()
+
+🔵 7. Reading Data — READ (Answer)
+Get all users
+User.query.all()
+
+Get one user
+User.query.get(1)
+
+Filter user
+User.query.filter_by(name="Vishal").first()
+
+🔵 8. Updating Data — UPDATE (Answer)
+user = User.query.get(1)
+user.name = "New Vishal"
+db.session.commit()
+
+🔵 9. Deleting Data — DELETE (Answer)
+user = User.query.get(1)
+db.session.delete(user)
+db.session.commit()
+
+🔵 10. One-to-Many Relationship (Answer)
+
+Example:
+One user can have many posts
+
+User model:
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    posts = db.relationship("Post", backref="author")
+
+Post model:
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
+
+Now you can do:
+
+user.posts     # all posts by this user
+post.author    # user who wrote this post
+
+🔵 11. Returning JSON (Answer)
+
+Models cannot be directly converted to JSON.
+So we create a method inside the model.
+
+def to_dict(self):
+    return {
+        "id": self.id,
+        "name": self.name,
+        "email": self.email
+    }
+
+
+Usage:
+
+return jsonify([u.to_dict() for u in User.query.all()])
+
+🔵 12. Full CRUD API Example (Answer)
+@app.post("/users")
+def add_user():
+    data = request.json
+    user = User(name=data["name"], email=data["email"])
+    db.session.add(user)
+    db.session.commit()
+    return user.to_dict()
+
+@app.get("/users")
+def get_users():
+    return jsonify([u.to_dict() for u in User.query.all()])
+
+@app.get("/users/<int:id>")
+def get_user(id):
+    user = User.query.get_or_404(id)
+    return user.to_dict()
+
+@app.put("/users/<int:id>")
+def update_user(id):
+    user = User.query.get_or_404(id)
+    data = request.json
+    user.name = data["name"]
+    user.email = data["email"]
+    db.session.commit()
+    return user.to_dict()
+
+@app.delete("/users/<int:id>")
+def delete_user(id):
+    user = User.query.get_or_404(id)
+    db.session.delete(user)
+    db.session.commit()
+    return {"message": "User deleted"}
+
+🟢 Final Summary for Day 9 (Short Answer Form)
+Topic	Answer
+ORM	Technique connecting Python objects with DB tables
+Model	Python class converted to table
+Create data	db.session.add() + commit()
+Read data	query.all(), filter_by()
+Update	Change object attributes + commit()
+Delete	db.session.delete()
+Relations	db.relationship, db.ForeignKey
+JSON Output	to_dict() method

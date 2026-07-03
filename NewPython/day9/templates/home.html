@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+
+    <h1>Welcome!</h1>
+
+    <h2>Total Users: {{ users|length }}</h2>
+    <h2>Total Posts: {{ posts|length }}</h2>
+
+    <h3>Users:</h3>
+    <ul>
+        {% for u in users %}
+            <li>{{ u.id }} — {{ u.name }}</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Posts:</h3>
+    <ul>
+        {% for p in posts %}
+            <li>{{ p.id }} — {{ p.title }} — User {{ p.user_id }}</li>
+            <li>{{ p.content }} — User {{ p.user_id }}</li>
+
+        {% endfor %}
+    </ul>
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+USER → Home Page
+      |
+      |-- If logged in → Show username
+      |-- If not → Show Login/Register links
+      |
+REGISTER → Fill form → Submit POST
+      |
+      |-- Check user exists?
+      |-- Hash password
+      |-- Save user
+      |-- Redirect to Login
+      |
+LOGIN → Fill form → Submit POST
+      |
+      |-- Find user by username
+      |-- Compare password hash
+      |-- If match → Set session["user_id"]
+      |-- Redirect to Dashboard
+      |
+DASHBOARD (Protected)
+      |
+      |-- Check session for user_id
+      |-- If not present → redirect to Login
+      |-- Show user's dashboard
+      |
+LOGOUT
+      |
+      |-- session.pop("user_id")
+      |-- Redirect to Home

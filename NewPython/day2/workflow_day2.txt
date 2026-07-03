@@ -1,0 +1,118 @@
+Flask App Workflow Summary
+When you run the Python script, it starts a local web server (using Flask)
+that listens for requests on http://127.0.0.1:5000/. The server has three routes (URLs)
+it handles:
+Two routes return JSON data (API endpoints).
+One route serves HTML web pages (simple web application).
+Workflow 1: The Homepage (GET /)
+Trigger: A user opens http://127.0.0.1:5000/ in a web browser (or any client sends a GET request to /).
+
+Flask Action: Flask matches the / URL to the home() function.
+
+Response:
+
+home() returns a Python dictionary.
+
+Flask automatically converts it to JSON.
+
+Client Sees:
+
+{"message": "Welcome to Day 2 API"}
+
+Workflow 2: The Dynamic User Page (GET /user/<name>)
+
+Trigger: A user visits http://127.0.0.1:5000/user/Alice.
+
+Flask Action:
+
+Flask matches this URL to user(name).
+
+Captures the part after /user/ (here "Alice") and passes it as the name variable.
+
+Response:
+
+user() creates a dictionary with the username.
+
+Flask converts it to JSON.
+
+Client Sees:
+
+{"username":"Alice","message":"welcome Alice"}
+
+
+Example: /user/Bob → {"username":"Bob","message":"welcome Bob"}
+
+Workflow 3: The Adder Web Page (GET /add and POST /add)
+
+This route handles both GET and POST requests.
+
+Part A: Getting the Form (GET)
+
+Trigger: User opens http://127.0.0.1:5000/add.
+
+Flask Action: Flask matches /add to the add() function.
+
+Logic:
+
+request.method is 'GET' → skip the if request.method == 'POST' block.
+
+Response:
+
+Returns render_template("add.html").
+
+Flask finds add.html in the templates folder, renders it, and sends HTML.
+
+Client Sees:
+
+A web page with a form asking for two numbers: "a" and "b".
+
+Part B: Submitting the Form (POST)
+
+Trigger:
+
+User types numbers into the form (e.g., a=10, b=5) and clicks "Submit".
+
+Browser Action:
+
+Sends a POST request to /add with form data (a=10, b=5).
+
+Flask Action:
+
+Matches /add to the add() function again.
+
+request.method is 'POST' → executes the if block.
+
+Logic:
+
+a = request.form.get("a", type=int)  # Converts '10' to integer
+b = request.form.get("b", type=int)  # Converts '5' to integer
+result = a + b                       # Calculates 15
+
+
+Response:
+
+Returns render_template("result.html", a=a, b=b, result=result).
+
+Flask injects a=10, b=5, result=15 into result.html.
+
+Client Sees:
+
+A new web page showing:
+"The result of 10 + 5 is 15."
+
+Important Note on Commented Code
+
+Active Code: Uses request.form and render_template. This is the web page workflow.
+
+Commented Code: Uses request.get_json(). This is an API workflow.
+
+PowerShell Example:
+
+Invoke-RestMethod -Uri "http://127.0.0.1:5000/add" `
+  -Method POST `
+  -ContentType "application/json" `
+  -Body '{"a":10,"b":5}'
+
+
+Would only work if you uncommented the JSON block and commented out the form-handling block.
+As the code is now, the server expects web form data, not JSON.

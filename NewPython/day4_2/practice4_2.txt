@@ -1,0 +1,79 @@
+Flask App: Visit Counter + Theme Cookie
+
+----------------------------------------------------
+1) Visit Counter
+
+When a user visits the root URL (/):
+
+- The server checks if a cookie named visit_count exists.
+- If it exists:
+    * Convert its value to an integer.
+    * Increment the count by 1.
+- If it doesn’t exist:
+    * Set count = 1 (first visit).
+
+The server returns:
+"You have visited this site X times."
+(where X is the current visit count)
+
+The server sets or updates the visit_count cookie with the new count.
+
+Every refresh increments the counter.
+
+----------------------------------------------------
+2) Set Theme
+
+When a user visits /set-theme/<theme>:
+
+- <theme> can be either "dark" or "light".
+- The server checks if the theme is valid.
+
+If valid:
+- Set a cookie named "theme" with the chosen value.
+- Return "Theme set to dark" or "Theme set to light".
+
+If invalid:
+- Return "Invalid theme! Use 'dark' or 'light'."
+
+----------------------------------------------------
+3) Get Theme
+
+When a user visits /get-theme:
+
+- The server checks the theme cookie.
+
+If it exists:
+    "Current theme is: <theme>"
+If it does not exist:
+    "Current theme is: not set"
+
+----------------------------------------------------
+4) Cookies in Action
+
+Feature           Cookie Name     Value Example
+----------------------------------------------------
+Visit counter     visit_count     1, 2, 3, ...
+Theme preference  theme           dark, light
+
+Cookies are stored in the browser and sent with every request.
+- Visit counter updates automatically with each visit.
+- Theme can be set anytime via /set-theme/<theme>.
+
+----------------------------------------------------
+5) Example Workflow
+
+First visit to /:
+    "You have visited this site 1 times." (visit_count = 1)
+
+Refresh /:
+    "You have visited this site 2 times." (visit_count = 2)
+
+Visit /set-theme/dark:
+    "Theme set to dark" (theme = dark)
+
+Visit /get-theme:
+    "Current theme is: dark"
+
+Visit /set-theme/light:
+    "Theme set to light" (theme = light)
+

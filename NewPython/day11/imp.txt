@@ -1,0 +1,92 @@
+Flask Blueprint & Template Notes
+1️⃣ Blueprint Basics
+
+Blueprints let you modularize your Flask app.
+
+Each Blueprint can have:
+
+Its own routes (routes.py)
+
+Its own templates (templates/)
+
+Its own static files (static/)
+
+Syntax to create a Blueprint:
+
+from flask import Blueprint
+
+auth = Blueprint('auth', __name__, template_folder='templates')
+
+
+Register the Blueprint in app.py:
+
+app.register_blueprint(auth)
+
+2️⃣ Folder Structure
+project/
+├── app.py
+├── auth/
+│   ├── __init__.py
+│   ├── routes.py
+│   └── templates/
+│       └── login.html
+
+
+__name__ in Blueprint ensures template_folder='templates' is relative to that folder.
+
+Always run Flask from project root, not inside a subfolder.
+
+3️⃣ Rendering Templates
+
+Use render_template("template_name.html")
+
+Flask first looks in the Blueprint’s template_folder, then in app-level templates/.
+
+Common mistake: jinja2.exceptions.TemplateNotFound → wrong folder path or running Flask from wrong directory.
+
+4️⃣ Handling Login Form
+
+Never send passwords via URL → use POST method.
+
+Example login.html:
+
+<form method="POST" action="/auth/login">
+    <input type="email" name="email" required>
+    <input type="password" name="password" required>
+    <button type="submit">Login</button>
+</form>
+
+
+Route to handle POST:
+
+@auth.route('/auth/login', methods=['GET','POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        # authenticate user here
+        return "Login successful"
+    return render_template('login.html')
+
+5️⃣ Tips to Avoid TemplateNotFound
+
+template_folder path must be relative to Blueprint file.
+
+Folder name must be exactly templates/.
+
+Flask must be run from the root project folder.
+
+Check your file paths with Python:
+
+import os
+print(os.path.exists("auth/templates/login.html"))
+
+6️⃣ Security Best Practices
+
+Use POST for forms that submit sensitive data.
+
+Never include passwords or secrets in URLs.
+
+Use HTTPS in production to encrypt data in transit.
+
+For real apps, hash passwords and validate users with a database.

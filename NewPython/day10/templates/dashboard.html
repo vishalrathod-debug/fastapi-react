@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <h2 class="mb-3">Dashboard</h2>
+
+            {% if user %}
+                <p class="lead">Welcome, <strong>{{ user.username }}</strong>! 👋</p>
+
+                <div class="mt-4">
+                    <a href="{{ url_for('home') }}" class="btn btn-primary">Home</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-danger ms-2">Logout</a>
+                </div>
+
+            {% else %}
+                <p class="lead text-muted">
+                    You are not logged in.
+                </p>
+
+                <a href="{{ url_for('login_get') }}" class="btn btn-primary">Login</a>
+                <a href="{{ url_for('register_get') }}" class="btn btn-secondary ms-2">Register</a>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

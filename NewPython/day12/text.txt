@@ -1,0 +1,244 @@
+📁 Project Structure Explained
+flask_jwt_auth/
+│
+├── app.py
+├── config.py
+├── requirements.txt
+│
+├── extensions/
+│   └── jwt.py
+│
+├── models/
+│   └── user.py
+│
+├── routes/
+│   ├── auth_routes.py
+│   └── user_routes.py
+│
+└── utils/
+    └── hash.py
+
+🔍 Top-Level Files
+📌 app.py
+
+This is the application entry point.
+
+Creates the Flask app instance.
+
+Registers blueprints (routes).
+
+Loads extensions (JWT, DB, etc.).
+
+Runs the server.
+
+Example:
+
+from flask import Flask
+from config import Config
+from extensions.jwt import jwt
+from routes.auth_routes import auth_bp
+from routes.user_routes import user_bp
+
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
+
+    jwt.init_app(app)
+
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(user_bp)
+
+    return app
+
+app = create_app()
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+📌 config.py
+
+Contains configuration settings for:
+
+JWT secret key
+
+Database URI
+
+Debug mode
+
+Other Flask settings
+
+Example:
+
+class Config:
+    SECRET_KEY = "your-secret"
+    JWT_SECRET_KEY = "your-jwt-secret"
+
+📌 requirements.txt
+
+Contains package dependencies.
+
+Used to install with:
+
+pip install -r requirements.txt
+
+
+Example dependencies:
+
+Flask
+Flask-JWT-Extended
+Werkzeug
+
+📁 extensions/
+📌 jwt.py
+
+Initializes Flask-JWT-Extended.
+
+Keeps extension setup separate and clean.
+
+Example:
+
+from flask_jwt_extended import JWTManager
+
+jwt = JWTManager()
+
+📁 models/
+📌 user.py
+
+Contains the User model (may be SQLAlchemy or simple dictionary).
+
+Stores methods like:
+
+Finding a user in DB
+
+Creating a user
+
+Example:
+
+class User:
+    def __init__(self, username, password_hash):
+        self.username = username
+        self.password_hash = password_hash
+
+📁 routes/
+📌 auth_routes.py
+
+Handles authentication endpoints:
+
+/login
+
+/register
+
+/refresh
+
+/logout
+
+Example:
+
+from flask import Blueprint, request, jsonify
+from flask_jwt_extended import create_access_token
+
+auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
+
+@auth_bp.post("/login")
+def login():
+    return {"msg": "Logged in"}
+
+📌 user_routes.py
+
+Handles endpoints related to users
+
+/users
+
+/profile
+
+protected routes using JWT
+
+Example:
+
+from flask import Blueprint
+from flask_jwt_extended import jwt_required
+
+user_bp = Blueprint("user", __name__, url_prefix="/user")
+
+@user_bp.get("/profile")
+@jwt_required()
+def profile():
+    return {"msg": "User profile"}
+
+📁 utils/
+📌 hash.py
+
+Utility functions for hashing and checking passwords.
+
+Uses werkzeug.security.
+
+Example:
+
+from werkzeug.security import generate_password_hash, check_password_hash
+
+def hash_password(password):
+    return generate_password_hash(password)
+
+def verify_password(hash, password):
+    return check_password_hash(hash, password)
+
+🧩 Where to Add HTML Files?
+
+Flask looks by default for HTML files in a folder called templates/.
+
+Add this folder at root:
+
+flask_jwt_auth/
+│
+├── templates/
+│     ├── index.html
+│     ├── login.html
+│     └── dashboard.html
+
+🧭 How to Serve the HTML Files
+
+In any route file, import render_template.
+
+Example inside user_routes.py:
+
+from flask import Blueprint, render_template
+
+user_bp = Blueprint("user", __name__, url_prefix="/user")
+
+@user_bp.get("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
+
+
+Example inside auth_routes.py:
+
+@auth_bp.get("/login")
+def login_page():
+    return render_template("login.html")
+
+🧭 Adding a New Route
+
+Add it inside the appropriate Blueprint file.
+
+Example new route inside auth_routes.py:
+
+@auth_bp.get("/forgot-password")
+def forgot_password():
+    return render_template("forgot_password.html")
+
+
+Add the file:
+
+templates/
+   └── forgot_password.html
+
+🎉 Summary
+Folder/File	Purpose
+app.py	App factory, run server, register blueprints
+config.py	Configuration settings
+requirements.txt	Python dependencies
+extensions/jwt.py	JWT initialization
+models/user.py	User model
+routes/	All endpoints (auth, user, others)
+utils/hash.py	Password hashing helpers
+templates/	HTML files served by Flask

@@ -1,0 +1,36 @@
+connect()
+
+Opens a connection to a database file (and creates it if it doesn't exist).
+
+Example: conn = sqlite3.connect("users.db")
+
+cursor()
+
+Creates a cursor object used to execute SQL commands.
+
+Example: cur = conn.cursor()
+
+CREATE TABLE
+
+An SQL command that creates a new table (e.g., a users table) with specified columns.
+
+Example:
+
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    username TEXT,
+    password TEXT
+)
+
+
+commit()
+
+Saves (writes) all changes made during the session to the database file.
+
+Example: conn.commit()
+
+close()
+
+Closes the database connection and frees resources.
+
+Example: conn.close()

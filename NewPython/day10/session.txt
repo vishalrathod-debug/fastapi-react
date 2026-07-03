@@ -1,0 +1,204 @@
+✅ BASIC
+1. What is a session?
+
+A session is server-stored data associated with a specific user across multiple requests.
+HTTP is stateless, so sessions allow you to “remember” information such as:
+
+Logged-in user
+
+Shopping cart
+
+Preferences
+
+Each user gets a unique session ID, usually stored in a cookie.
+
+2. Difference between Session & Cookies
+Feature	Cookies	Sessions
+Stored on	Client (browser)	Server (data), client only stores ID
+Security	Easier to tamper with	More secure (data not exposed)
+Capacity	Small (4KB)	Larger (server memory / DB)
+Expiry	Controlled by browser	Controlled by server
+Use cases	Preferences, non-sensitive data	Login state, sensitive data
+3. How Flask stores session internally
+
+Flask uses secure cookie-based sessions by default:
+
+All session data is stored inside a cookie (serialized & signed).
+
+Controlled by the SECRET_KEY.
+
+Flask verifies that the cookie hasn't been tampered with.
+
+Data is not encrypted (just signed), so users can read it but cannot modify it.
+
+Example stored cookie value:
+eyJ1c2VyIjoiQWRtaW4ifQ.ZsP0RA.R4F1... (signed JSON)
+
+4. Setting and reading session values
+from flask import Flask, session
+
+app = Flask(__name__)
+app.secret_key = "supersecret"
+
+@app.route('/set')
+def set_session():
+    session['user'] = 'Alice'
+    return "Session set!"
+
+@app.route('/get')
+def get_session():
+    return session.get('user', 'No session found')
+
+✅ MEDIUM
+5. Removing session values
+Remove a single key:
+session.pop('user', None)
+
+Clear entire session:
+session.clear()
+
+6. Using session for login state
+@app.route('/login', methods=['POST'])
+def login():
+    # after verifying username/password:
+    session['logged_in'] = True
+    session['user_id'] = 42
+    return "Logged in"
+
+@app.route('/dashboard')
+def dashboard():
+    if not session.get('logged_in'):
+        return "Please log in"
+    return f"Welcome user {session['user_id']}"
+
+7. Permanent sessions
+
+Flask sessions are temporary by default (expire when the browser closes).
+To make a session permanent:
+
+session.permanent = True
+
+
+This uses PERMANENT_SESSION_LIFETIME.
+
+8. Session lifetime configuration
+
+Set globally:
+
+from datetime import timedelta
+
+app.permanent_session_lifetime = timedelta(days=7)
+
+
+When using:
+
+session.permanent = True
+
+
+The session cookie will expire after 7 days.
+
+✅ ADVANCED
+9. Server-side sessions (vs Flask default client-side)
+
+By default, Flask sessions are client-side (stored in cookies).
+
+Server-side sessions store session data on the server (filesystem, Redis, database).
+The cookie contains only a session ID (not data).
+
+Benefits:
+
+More secure (no readable data on client).
+
+Supports large session objects.
+
+Required for scalable, multi-device login.
+
+10. Session security
+
+Key concerns:
+
+✔ Use a strong SECRET_KEY
+app.secret_key = os.urandom(32)
+
+✔ Enable HTTPS-only cookies
+SESSION_COOKIE_SECURE = True
+
+✔ Prevent JavaScript access
+SESSION_COOKIE_HTTPONLY = True
+
+✔ Restrict cookie sending
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+✔ Regenerate session ID on login
+
+Prevents session fixation attacks.
+
+11. Signing & Encryption
+
+Flask default session cookie is:
+
+Signed (to check integrity)
+
+Not encrypted (user can read the content)
+
+To get encryption, you need:
+
+Flask-Session (server-side)
+
+Flask-KVSession
+
+Custom encrypted cookie session extensions
+
+12. Using Flask-Session (filesystem, Redis, DB)
+
+Install:
+
+pip install Flask-Session
+
+
+Basic setup:
+
+from flask import Flask, session
+from flask_session import Session
+
+app = Flask(__name__)
+app.config["SESSION_TYPE"] = "filesystem"  # or redis, sqlalchemy, memcached
+Session(app)
+
+Filesystem
+app.config["SESSION_TYPE"] = "filesystem"
+
+
+Stores sessions in flask_session/.
+
+Redis
+app.config["SESSION_TYPE"] = "redis"
+app.config["SESSION_REDIS"] = redis.from_url("redis://localhost:6379")
+
+SQL Database
+app.config["SESSION_TYPE"] = "sqlalchemy"
+app.config["SESSION_SQLALCHEMY"] = db
+
+13. How sessions work in scalable apps
+
+When your app runs across multiple servers (load-balanced):
+
+Client sends a request → Load balancer sends it to Server A
+
+Next request may go to Server B
+
+Thus:
+
+❌ Client-side sessions → Works (state in cookie, no dependency on server)
+
+❌ Server-side local sessions (filesystem) → Breaks (each server has different storage)
+
+✔ Use shared session storage, e.g.:
+
+Redis
+
+Memcached
+
+SQL database
+
+This keeps session state consistent regardless of which server handles the request.

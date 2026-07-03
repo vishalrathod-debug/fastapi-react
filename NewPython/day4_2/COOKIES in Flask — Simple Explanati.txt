@@ -1,0 +1,98 @@
+COOKIES in Flask — Simple Explanation
+
+What is a Cookie?
+
+A cookie is a small piece of data stored in your browser, not on the server.
+
+Example:
+You open a website → it stores "username": "Vishal" in your browser.
+When you visit again → the browser automatically sends that cookie back.
+
+So cookies help with:
+
+Remembering logged-in users
+
+Saving theme (dark/light mode)
+
+Saving preferences
+
+Tracking cart items (e-commerce)
+
+How Cookies Work in Flask (Very Simple)
+Two important parts:
+
+Set cookie (Server → Browser)
+
+Get cookie (Browser → Server)
+
+Setting a Cookie
+from flask import Flask, make_response
+app = Flask(name)
+
+@app.get("/set-cookie")
+def set_cookie():
+response = make_response("Cookie is set!")
+response.set_cookie("username", "Vishal", max_age=3600)
+return response
+
+What happens?
+The server sends a cookie with name "username" and value "Vishal".
+The browser stores it.
+
+Getting a Cookie
+from flask import Flask, request
+app = Flask(name)
+
+@app.get("/get-cookie")
+def get_cookie():
+user = request.cookies.get("username")
+return f"Hello {user}!"
+
+What happens?
+Browser automatically sends cookies with every request.
+You can read them with request.cookies.get().
+
+Deleting a Cookie
+@app.get("/delete-cookie")
+def delete_cookie():
+response = make_response("Cookie deleted!")
+response.set_cookie("username", "", max_age=0)
+return response
+
+Visual Summary (Easy to Remember)
+Action - Code
+Set cookie - response.set_cookie(name, value, max_age)
+Get cookie - request.cookies.get(name)
+Delete cookie - response.set_cookie(name, "", max_age=0)
+
+Important: Cookies Are Not Secure By Default
+Cookies can be:
+
+Modified by the user
+
+Stolen if not protected
+
+Not good for sensitive info (passwords, tokens)
+
+For security:
+Use HttpOnly=True
+Use Secure=True
+
+Example:
+response.set_cookie("username", "Vishal", httponly=True, secure=True)
+
+Small Real-Life Example (Remember Last Page User Visited)
+
+from flask import Flask, request, make_response
+app = Flask(name)
+
+@app.get("/home")
+def home():
+resp = make_response("Welcome Home")
+resp.set_cookie("last_page", "home")
+return resp
+
+@app.get("/profile")
+def profile():
+last_page = request.cookies.get("last_page")
+return f"You came from: {last_page}"

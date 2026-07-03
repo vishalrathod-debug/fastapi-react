@@ -1,0 +1,204 @@
+================================================================
+RENDERING HTML FROM FLASK: A COMPLETE GUIDE
+================================================================
+
+Flask uses Jinja2, a powerful templating engine, to render HTML pages dynamically.
+Rendering HTML generally involves:
+1. Creating HTML template files (.html) inside a 'templates/' folder.
+2. Passing data from Flask routes to those templates.
+3. Using Jinja2 syntax inside templates to insert dynamic data.
+
+----------------------------------------------------------------
+1. PROJECT STRUCTURE FOR RENDERING HTML
+----------------------------------------------------------------
+By convention, Flask looks for templates inside a folder called 'templates'.
+
+project/
+│
+├── app.py
+├── static/
+│     └── style.css
+└── templates/
+      ├── index.html
+      └── about.html
+
+templates/ -> HTML files
+static/    -> CSS, JS, images
+
+----------------------------------------------------------------
+2. BASIC EXAMPLE: RENDERING A TEMPLATE
+----------------------------------------------------------------
+[app.py]
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    # render_template loads the file and sends it to the browser
+    return render_template("index.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+[templates/index.html]
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Home</title>
+</head>
+<body>
+    <h1>Hello from Flask!</h1>
+</body>
+</html>
+
+----------------------------------------------------------------
+3. PASSING VARIABLES TO HTML
+----------------------------------------------------------------
+[app.py]
+@app.route("/user/<name>")
+def user(name):
+    return render_template("user.html", username=name)
+
+[templates/user.html]
+<h1>Welcome, {{ username }}!</h1>
+
+----------------------------------------------------------------
+4. CONTROL STRUCTURES (LOOPS & CONDITIONALS)
+----------------------------------------------------------------
+[app.py]
+@app.route("/products")
+def products():
+    items = ["Laptop", "Phone", "Tablet"]
+    return render_template("products.html", items=items)
+
+[templates/products.html]
+<ul>
+{% for item in items %}
+    <li>{{ item }}</li>
+{% endfor %}
+</ul>
+
+----------------------------------------------------------------
+5. TEMPLATE INHERITANCE (DRY PRINCIPLE)
+----------------------------------------------------------------
+Use base templates so you don’t repeat layouts (navbars, footers, etc).
+
+[templates/base.html]
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}My Site{% endblock %}</title>
+</head>
+<body>
+    <header>My Website</header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>© 2025</footer>
+</body>
+</html>
+
+[templates/home.html (The Child Template)]
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+    <h1>This is the homepage!</h1>
+{% endblock %}
+
+----------------------------------------------------------------
+6. USING STATIC FILES (CSS/JS)
+----------------------------------------------------------------
+Static files live in the 'static/' directory.
+
+[Linking CSS]
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+[Linking JS]
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+----------------------------------------------------------------
+7. PASSING DICTIONARIES, JSON, OR OBJECTS
+----------------------------------------------------------------
+[app.py]
+@app.route("/profile")
+def profile():
+    user = {
+        "name": "Alice",
+        "age": 25,
+        "hobbies": ["reading", "coding", "music"]
+    }
+    return render_template("profile.html", user=user)
+
+[templates/profile.html]
+<h1>{{ user.name }}</h1>
+<p>Age: {{ user.age }}</p>
+<ul>
+{% for hobby in user.hobbies %}
+    <li>{{ hobby }}</li>
+{% endfor %}
+</ul>
+
+----------------------------------------------------------------
+8. JINJA2 FILTERS
+----------------------------------------------------------------
+Filters modify values inside the template:
+
+{{ username|upper }}       {{ price|round(2) }}       {{ paragraph|safe }}       ----------------------------------------------------------------
+9. PREVENTING HTML INJECTION
+----------------------------------------------------------------
+Jinja2 automatically escapes variables for security.
+If a user enters "<h1>Hi</h1>", it is displayed as text, not rendered as HTML.
+Use |safe only if you explicitly trust the source and want it rendered as HTML.
+
+----------------------------------------------------------------
+10. INCLUDING HTML FRAGMENTS
+----------------------------------------------------------------
+Useful for reusable components (cards, widgets).
+
+[templates/user_list.html]
+{% for user in users %}
+    {% include "user_card.html" %}
+{% endfor %}
+
+[templates/user_card.html]
+<div class="card">
+    <p>{{ user.name }}</p>
+</div>
+
+----------------------------------------------------------------
+11. TEMPLATE AUTO-RELOAD
+----------------------------------------------------------------
+Flask auto-reloads templates when debug=True. You can force it manually:
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+----------------------------------------------------------------
+12. RENDERING SUBFOLDERS
+----------------------------------------------------------------
+Organize templates in folders:
+templates/
+   pages/
+       home.html
+   partials/
+       nav.html
+
+Usage:
+render_template("pages/home.html")
+
+----------------------------------------------------------------
+13. SUMMARY CHEATSHEET
+----------------------------------------------------------------
+Task                    |  Syntax / Method
+------------------------|---------------------------------------
+Load Template           |  render_template("file.html")
+Display Variable        |  {{ variable }}
+Logic (Loop/If)         |  {% logic %} ... {% endlogic %}
+Static Files            |  url_for('static', filename=...)
+Inheritance             |  {% extends "base.html" %}
+Define Block            |  {% block name %} ... {% endblock %}
+Include Partial         |  {% include "fragment.html" %}
+Safe HTML               |  {{ variable|safe }}

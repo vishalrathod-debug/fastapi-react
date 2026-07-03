@@ -1,0 +1,142 @@
+Flask Application Workflow Summary
+
+This Flask application starts a local web server with two API endpoints:
+
+/search – a GET route that reads query parameters from the URL.
+
+/register – a POST route that accepts JSON data in the request body.
+
+Workflow 1: Search Route (GET /search)
+
+Purpose: Read data sent via the URL’s query string.
+
+Trigger: A client sends a GET request to /search with query parameters.
+
+Example URL:
+
+http://127.0.0.1:5000/search?item=laptop&price=1299.99
+
+
+Flask Action: Flask matches the /search URL to the search() function.
+
+Logic:
+
+item = request.args.get("item", "unknown")
+price = request.args.get("price", "0.00")
+
+
+Reads item from query parameters; defaults to "unknown" if not provided.
+
+Reads price from query parameters; defaults to "0.00" if not provided.
+
+Response: Returns a JSON dictionary:
+
+{
+  "item": "laptop",
+  "price": "1299.99",
+  "message": "Query parameters received"
+}
+
+
+Default Behavior: If no query parameters are provided:
+
+http://127.0.0.1:5000/search
+
+
+Response:
+
+{
+  "item": "unknown",
+  "price": "0.00",
+  "message": "Query parameters received"
+}
+
+Workflow 2: Register Route (POST /register)
+
+Purpose: Accept JSON data to create a new resource (e.g., a user).
+
+Trigger: A client sends a POST request with JSON body and Content-Type: application/json.
+
+Path A: Successful Registration
+
+Example JSON Body:
+
+{
+  "name": "Alice",
+  "age": 30
+}
+
+
+Flask Logic:
+
+data = request.json           # Parses JSON into a Python dictionary
+name = data.get("name")       # "Alice"
+age = data.get("age")         # 30
+
+if not name or not age:
+    return {"error": "name and age are required"}, 400
+
+
+Response: Returns 201 Created with JSON:
+
+{
+  "message": "User registered successfully",
+  "name": "Alice",
+  "age": 30
+}
+
+Path B: Error – Missing Fields
+
+Example JSON Body:
+
+{"name": "Bob"}
+# OR {"location": "USA"}
+
+
+Logic:
+
+data = request.json → parses JSON.
+
+data.get("name") or data.get("age") may return None.
+
+If either name or age is missing, the check triggers.
+
+Response: Returns HTTP 400 Bad Request:
+
+{
+  "error": "name and age are required"
+}
+
+Path C: Error – Not a JSON Request
+
+Triggers:
+
+User opens /register in a browser (sends GET).
+
+Client sends POST but uses form data instead of JSON.
+
+Logic:
+
+data = request.json  # Will be None because there’s no JSON
+if not data:
+    return {"error": "No JSON data provided"}, 400
+
+
+Response: HTTP 400 Bad Request:
+
+{
+  "error": "No JSON data provided"
+}
+
+
+Note: Currently, the /register route does not check request.
+method and always expects JSON, so GET requests or non-JSON POST requests fail.
+
+| Method               | When to use                                     | Returns            |
+| -------------------- | ----------------------------------------------- | ------------------ |
+| `request.get_json()` | JSON body (Content-Type: application/json)      | dict or None       |
+| `request.json`       | Same as `get_json()`                            | dict or None       |
+| `request.data`       | Raw request body (bytes)                        | bytes              |
+| `request.form`       | Form data (`application/x-www-form-urlencoded`) | ImmutableMultiDict |
+| `request.args`       | Query parameters in URL (GET requests)          | ImmutableMultiDict |
+| `request.values`     | Query parameters + form data                    | ImmutableMultiDict |

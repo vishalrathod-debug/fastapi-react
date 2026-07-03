@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Profile Page{% endblock %}
+
+
+{% block content %}
+<h2>Hello {{ name }}</h2>
+<p>Age: {{ age }}</p>
+<p>Email: {{ email }}</p>
+
+<h3>Skills:</h3>
+<ul>
+    {% for skill in skills %}
+        <li>{{ skill }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

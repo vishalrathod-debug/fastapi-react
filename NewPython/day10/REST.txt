@@ -1,0 +1,143 @@
+⭐ DAY 11 — REST API (Full Explanation)
+
+(Flask 15-Day Master Plan → Day 11)
+
+On this day you will fully understand how a REST API works, how we design endpoints, how HTTP methods map to CRUD operations, how we use JSON as input/output, how we send proper status codes, and how to keep our API structured and clean.
+
+1. What Is a REST API?
+
+A REST API (Representational State Transfer API) is a way for two systems to communicate over HTTP.
+A client (mobile app, website, IoT device) sends a request, and your Flask server sends a response, usually in JSON form.
+
+REST APIs always follow these principles:
+
+Client–Server Separation
+The client never accesses the database directly. It only talks to the API.
+
+Stateless Communication
+Every request should contain all required data.
+The server does not store user session state.
+
+Uniform Interface
+Endpoints follow a predictable pattern:
+
+/students
+
+/students/<id>
+
+/products
+
+/products/<id>
+
+Use of Standard HTTP Methods
+Each method has a meaning (explained next).
+
+2. Mapping HTTP Methods to CRUD
+CRUD Operation	HTTP Method	Meaning
+Create	POST	Create a new resource
+Read	GET	Retrieve data
+Update	PUT/PATCH	Modify existing resource
+Delete	DELETE	Remove resource
+
+Example:
+
+GET /books → Get all books
+
+POST /books → Add a new book
+
+GET /books/10 → Get book with ID 10
+
+PUT /books/10 → Update book 10
+
+DELETE /books/10 → Delete book 10
+
+3. How a REST API Works in Flask
+
+Flask receives a request → Processes → Returns JSON.
+
+Basic Example
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+@app.get("/hello")
+def hello():
+    return jsonify({"message": "Hello API"})
+
+4. JSON Request and JSON Response
+Request JSON Example (client sends input)
+{
+  "name": "Vishal",
+  "age": 22
+}
+
+
+In Flask you read request JSON using:
+
+data = request.get_json()
+name = data.get("name")
+
+JSON Response Example (server returns output)
+return jsonify({"status": "success", "message": "User created"}), 201
+
+5. Status Codes (Very Important)
+
+REST APIs must return proper HTTP status codes.
+
+Code	Meaning	When Used
+200 OK	Success	Reading or updating
+201 Created	New resource created	POST
+400 Bad Request	Input missing or invalid	Wrong JSON
+401 Unauthorized	No login	JWT, Auth
+404 Not Found	Resource not found	Wrong ID
+409 Conflict	Duplicate data	Existing email
+500 Server Error	Server crash	Exceptions
+6. Building a Complete REST API (Without Sessions)
+
+(Connected to Day 10 ORM knowledge)
+
+Model
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+
+6.1 Create (POST /students)
+@app.post("/students")
+def create_student():
+    data = request.get_json()
+    student = Student(name=data["name"], email=data["email"])
+    db.session.add(student)
+    db.session.commit()
+    return jsonify({"message": "Student created"}), 201
+
+6.2 Read All (GET /students)
+@app.get("/students")
+def get_students():
+    students = Student.query.all()
+    result = [{"id": s.id, "name": s.name, "email": s.email} for s in students]
+    return jsonify(result)
+
+6.3 Read One (GET /students/<id>)
+@app.get("/students/<int:id>")
+def get_student(id):
+    student = Student.query.get_or_404(id)
+    return jsonify({"id": student.id, "name": student.name, "email": student.email})
+
+6.4 Update (PUT /students/<id>)
+@app.put("/students/<int:id>")
+def update_student(id):
+    student = Student.query.get_or_404(id)
+    data = request.get_json()
+    student.name = data["name"]
+    student.email = data["email"]
+    db.session.commit()
+    return jsonify({"message": "Updated successfully"})
+
+6.5 Delete (DELETE /students/<id>)
+@app.delete("/students/<int:id>")
+def delete_student(id):
+    student = Student.query.get_or_404(id)
+    db.session.delete(student)
+    db.session.commit()
+    return jsonify({"message": "Deleted successfully"})

@@ -1,0 +1,92 @@
+url_for() — Dynamic URL Building
+
+url_for() generates URLs using the function name of a route instead of hard-coding paths.
+
+Why use it?
+- URLs update automatically if routes change
+- Helps avoid broken links
+- Works with dynamic URL parameters
+
+Example:
+from flask import Flask, url_for
+
+app = Flask(__name__)
+
+@app.route('/user/<username>')
+def profile(username):
+    return f"Hello {username}!"
+
+@app.route('/link')
+def link():
+    return url_for('profile', username='John')
+
+----------------------------------------------------
+
+Redirects
+
+Flask uses redirect() to send the client to another route or URL.
+
+Example:
+from flask import redirect, url_for
+
+@app.route('/old')
+def old():
+    return redirect(url_for('new'))
+
+@app.route('/new')
+def new():
+    return "You were redirected!"
+
+----------------------------------------------------
+
+Custom Response Object
+
+Use a custom Response object when you need control over headers, status codes, etc.
+
+Example:
+from flask import Response
+
+@app.route('/custom')
+def custom():
+    response = Response("Custom response body", status=202)
+    response.headers['X-Custom-Header'] = 'Hello'
+    return response
+
+----------------------------------------------------
+
+Setting Cookies
+
+Use set_cookie() on the response object.
+
+Example:
+from flask import make_response
+
+@app.route('/set-cookie')
+def set_cookie():
+    resp = make_response("Cookie has been set!")
+    resp.set_cookie('username', 'Alice', max_age=60*60*24)  # 1 day
+    return resp
+
+----------------------------------------------------
+
+Reading Cookies
+
+Use request.cookies to read cookies from the client.
+
+Example:
+from flask import request
+
+@app.route('/get-cookie')
+def get_cookie():
+    username = request.cookies.get('username')
+    return f"Cookie value: {username}"
+
+----------------------------------------------------
+
+Summary
+
+url_for()          - Build URLs dynamically using route function names
+redirect()         - Send user to another route or URL
+Custom Response    - Full control over response, headers, status
+set_cookie()       - Store cookie in user's browser
+request.cookies    - Read cookies sent by the client
